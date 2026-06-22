@@ -1,0 +1,17 @@
+{
+  "name": "tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --outfile=dist/tracker.js --platform=browser --format=iife"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.19.0",
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "@repo/typescript-config": "workspace:*"
+  }
+}
