@@ -6,7 +6,6 @@ interface BaseEvent {
 
 interface PageViewEven extends BaseEvent{
     event_type: "page_view",
-    time_spent?: number // extra
 }
 
 interface ClickEvent  extends BaseEvent{
