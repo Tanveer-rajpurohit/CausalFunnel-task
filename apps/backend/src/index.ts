@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDb from "./config/db";
+import rootRouter from "./routes"; // Imports the index.ts file automatically
 
 dotenv.config();
 
@@ -17,6 +18,9 @@ connectDb();
 app.get("/", (req: Request, res: Response) => {
     res.send("CausalFunnel Backend API is running!");
 });
+
+
+app.use('/api/v1', rootRouter);
 
 
 app.listen(PORT, () => {
