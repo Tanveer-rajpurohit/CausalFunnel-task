@@ -1,0 +1,54 @@
+"use strict";
+(() => {
+  // src/session/session.ts
+  var SESSION_COOKIE = "cf_session";
+  var readCookie = (name) => {
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match?.[2] ?? null;
+  };
+  var writeCookie = (name, value) => {
+    document.cookie = `${name}=${value}; path=/; SameSite=Strict`;
+  };
+  var getSessionId = () => {
+    const existing = readCookie(SESSION_COOKIE);
+    if (existing) return existing;
+    const id = crypto.randomUUID();
+    writeCookie(SESSION_COOKIE, id);
+    return id;
+  };
+  var session_default = getSessionId;
+
+  // src/tracker/pageView.ts
+  var trackPageView = (backendUrl) => {
+    console.log({
+      session_id: session_default(),
+      event_type: "page_view",
+      page_url: window.location.href,
+      timestamp: Date.now()
+    });
+  };
+  var pageView_default = trackPageView;
+
+  // src/tracker/click.ts
+  var initClickTracking = (backendUrl) => {
+    document.addEventListener("click", (e) => {
+      console.log({
+        session_id: session_default(),
+        event_type: "click",
+        page_url: window.location.href,
+        timestamp: Date.now(),
+        coord_x: e.clientX,
+        coord_y: e.clientY
+      });
+    });
+  };
+  var click_default = initClickTracking;
+
+  // src/index.ts
+  var initTracker = (config) => {
+    if (typeof window === "undefined") return;
+    pageView_default(config.backendUrl);
+    click_default(config.backendUrl);
+  };
+  window.initTracker = initTracker;
+})();

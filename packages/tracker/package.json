@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --outfile=dist/tracker.js --platform=browser --format=iife"
+    "build": "esbuild src/index.ts --bundle --outfile=dist/tracker.js --platform=browser --format=iife",
+    "postbuild": "copy dist\\tracker.js ..\\..\\apps\\demo-web\\public\\tracker.js"
   },
   "keywords": [],
   "author": "",

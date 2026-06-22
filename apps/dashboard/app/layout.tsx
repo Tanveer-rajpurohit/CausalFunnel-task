@@ -47,7 +47,7 @@ export default function RootLayout({
       className={`${EB_Graramond_dark.variable} ${EB_Graramond_light.variable} ${inter_regular.variable} ${inter_bold.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <SmoothScroll>
             {children}
