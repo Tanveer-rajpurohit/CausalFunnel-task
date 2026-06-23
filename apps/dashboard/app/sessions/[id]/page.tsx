@@ -30,44 +30,49 @@ export default function SessionJourneyPage() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let ctx: gsap.Context;
+    let timer: NodeJS.Timeout;
+
     if (activeTab === "timeline" && !eventsLoading && events.length > 0) {
-      const timer = setTimeout(() => {
-        if (timelineContainerRef.current && scrollLineRef.current) {
-          ScrollTrigger.create({
-            trigger: timelineContainerRef.current,
-            start: "top center",
-            end: "bottom center",
-            animation: gsap.fromTo(
-              scrollLineRef.current, 
-              { height: "0%" }, 
-              { height: "100%", ease: "none" }
-            ),
-            scrub: 0.5,
-          });
-
-          const dots = gsap.utils.toArray<HTMLDivElement>(".timeline-dot");
-          dots.forEach((dot) => {
+      timer = setTimeout(() => {
+        ctx = gsap.context(() => {
+          if (timelineContainerRef.current && scrollLineRef.current) {
             ScrollTrigger.create({
-              trigger: dot,
+              trigger: timelineContainerRef.current,
               start: "top center",
-              animation: gsap.to(dot, {
-                backgroundColor: "#cc785c",
-                scale: 1.2,
-                boxShadow: "0 0 10px rgba(204,120,92,0.8)",
-                duration: 0.3,
-                ease: "power2.out"
-              }),
-              toggleActions: "play none none reverse",
+              end: "bottom center",
+              animation: gsap.fromTo(
+                scrollLineRef.current, 
+                { height: "0%" }, 
+                { height: "100%", ease: "none" }
+              ),
+              scrub: 0.5,
             });
-          });
-        }
-      }, 100);
 
-      return () => {
-        clearTimeout(timer);
-        ScrollTrigger.getAll().forEach(t => t.kill());
-      };
+            const dots = gsap.utils.toArray<HTMLDivElement>(".timeline-dot");
+            dots.forEach((dot) => {
+              ScrollTrigger.create({
+                trigger: dot,
+                start: "top center",
+                animation: gsap.to(dot, {
+                  backgroundColor: "#cc785c",
+                  scale: 1.2,
+                  boxShadow: "0 0 10px rgba(204,120,92,0.8)",
+                  duration: 0.3,
+                  ease: "power2.out"
+                }),
+                toggleActions: "play none none reverse",
+              });
+            });
+          }
+        });
+      }, 100);
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
   }, [activeTab, eventsLoading, events]);
 
   const eventTypes = [
