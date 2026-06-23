@@ -7,7 +7,7 @@ const connectDb = async (retries = 3, delay = 3000): Promise<void> => {
     while (retries > 0) {
         try {
             await mongoose.connect(MONGODB_URI, {
-                serverSelectionTimeoutMS: 3000,
+                serverSelectionTimeoutMS: 10000, 
             });
             console.log("Database successfully connected");
             return; 

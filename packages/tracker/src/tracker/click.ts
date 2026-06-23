@@ -1,14 +1,15 @@
 import getSessionId from '../session/session';
+import sendEvent from '../api/sendEvent';
 
 const initClickTracking = (backendUrl: string): void => {
     document.addEventListener('click', (e: MouseEvent) => {
-        console.log({
-            session_id: getSessionId(),
-            event_type: 'click',
-            page_url:   window.location.href,
-            timestamp:  Date.now(),
-            coord_x:    e.clientX,
-            coord_y:    e.clientY,
+        sendEvent(backendUrl, {
+            sessionId: getSessionId(),
+            eventType: 'click',
+            pageUrl:   window.location.href,
+            timestamp: Date.now(),
+            coordX:    e.clientX,
+            coordY:    e.clientY,
         });
     });
 };

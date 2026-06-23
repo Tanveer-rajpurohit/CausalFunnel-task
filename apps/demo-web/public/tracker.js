@@ -18,12 +18,31 @@
   };
   var session_default = getSessionId;
 
+  // src/api/sendEvent.ts
+  var sendEvent = (backendUrl, payload) => {
+    const url = `${backendUrl}/api/v1/events`;
+    const body = JSON.stringify(payload);
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: "application/json" });
+      navigator.sendBeacon(url, blob);
+      return;
+    }
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true
+    }).catch(() => {
+    });
+  };
+  var sendEvent_default = sendEvent;
+
   // src/tracker/pageView.ts
   var trackPageView = (backendUrl) => {
-    console.log({
-      session_id: session_default(),
-      event_type: "page_view",
-      page_url: window.location.href,
+    sendEvent_default(backendUrl, {
+      sessionId: session_default(),
+      eventType: "page_view",
+      pageUrl: window.location.href,
       timestamp: Date.now()
     });
   };
@@ -32,13 +51,13 @@
   // src/tracker/click.ts
   var initClickTracking = (backendUrl) => {
     document.addEventListener("click", (e) => {
-      console.log({
-        session_id: session_default(),
-        event_type: "click",
-        page_url: window.location.href,
+      sendEvent_default(backendUrl, {
+        sessionId: session_default(),
+        eventType: "click",
+        pageUrl: window.location.href,
         timestamp: Date.now(),
-        coord_x: e.clientX,
-        coord_y: e.clientY
+        coordX: e.clientX,
+        coordY: e.clientY
       });
     });
   };

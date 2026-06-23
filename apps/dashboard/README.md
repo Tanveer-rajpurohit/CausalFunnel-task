@@ -1,28 +1,53 @@
-## Getting Started
+# Dashboard
 
-First, run the development server:
+Next.js 16 application that displays analytics data from the backend API.
+
+---
+
+## Views
+
+### Sessions View
+
+A table listing all tracked sessions. Each row shows the session ID and its event count. Clicking a session row expands it to reveal the ordered list of events, showing the full user journey through the site.
+
+### Heatmap View
+
+Provides a dropdown to select a page URL. Once selected, click positions are rendered as dots on a scaled overlay, visualizing where users clicked on that page.
+
+---
+
+## Environment Variables
+
+| Variable                | Example                  | Description                        |
+|-------------------------|--------------------------|------------------------------------|
+| NEXT_PUBLIC_BACKEND_URL | http://localhost:8080    | Base URL of the backend API        |
+
+---
+
+## Run Locally
+
+Option 1 -- from the monorepo root (runs on port 3000):
 
 ```bash
-yarn dev
+pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Option 2 -- directly from the dashboard directory:
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd apps/dashboard
+pnpm dev
+```
 
-To create [API routes](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) add an `api/` directory to the `app/` directory with a `route.ts` file. For individual endpoints, create a subfolder in the `api` directory, like `api/hello/route.ts` would map to [http://localhost:3000/api/hello](http://localhost:3000/api/hello).
+The dashboard starts on `http://localhost:3000`.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn/foundations/about-nextjs) - an interactive Next.js tutorial.
+Deployed on **Vercel**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. Connect the repository to Vercel and set the root directory to `apps/dashboard`.
+2. Set the `NEXT_PUBLIC_BACKEND_URL` environment variable to the production backend URL (e.g., `YOUR_RAILWAY_URL`).
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_source=github.com&utm_medium=referral&utm_campaign=turborepo-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Production URL: `YOUR_VERCEL_URL`

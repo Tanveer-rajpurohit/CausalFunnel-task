@@ -1,28 +1,47 @@
-## Getting Started
+# Demo Web
 
-First, run the development server:
+A demo webpage used to generate tracking data for the analytics pipeline. The browser tracker script is injected into the page via the Next.js layout.
+
+---
+
+## How the Tracker Is Loaded
+
+A `TrackerScript` client component loads `/tracker.js` using `next/script` with `strategy="afterInteractive"`. Once the script has loaded, it calls `window.initTracker({ backendUrl })` to start capturing events.
+
+The `tracker.js` file itself is not authored in this app. It is built in `packages/tracker` and copied into `public/tracker.js` during the tracker build step (via a postbuild script).
+
+---
+
+## Environment Variables
+
+| Variable                | Example                  | Description                        |
+|-------------------------|--------------------------|------------------------------------|
+| NEXT_PUBLIC_BACKEND_URL | http://localhost:8080    | Base URL of the backend API        |
+
+---
+
+## Run Locally
+
+From the monorepo root (runs on port 3001):
 
 ```bash
-yarn dev
+pnpm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) with your browser to see the result.
+Make sure the tracker has been built first so that `public/tracker.js` exists:
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd packages/tracker
+pnpm build
+```
 
-To create [API routes](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) add an `api/` directory to the `app/` directory with a `route.ts` file. For individual endpoints, create a subfolder in the `api` directory, like `api/hello/route.ts` would map to [http://localhost:3001/api/hello](http://localhost:3001/api/hello).
+---
 
-## Learn More
+## Deploy
 
-To learn more about Next.js, take a look at the following resources:
+Deployed on **Vercel**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn/foundations/about-nextjs) - an interactive Next.js tutorial.
+1. Connect the repository to Vercel and set the root directory to `apps/demo-web`.
+2. Set the `NEXT_PUBLIC_BACKEND_URL` environment variable to the production backend URL (e.g., `YOUR_RAILWAY_URL`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_source=github.com&utm_medium=referral&utm_campaign=turborepo-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Production URL: `YOUR_VERCEL_URL`
