@@ -5,7 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "../components/ThemeProvider";
 import { SmoothScroll } from "../components/SmoothScroll";
 import { TrackerScript } from "../components/TrackerScript";
-import { Navbar } from "../components/Navbar"; // Added import
+import { Navbar } from "../components/Navbar";
 
 const EB_Graramond_dark = EB_Garamond({
   variable: "--font-eb-garamond-dark",

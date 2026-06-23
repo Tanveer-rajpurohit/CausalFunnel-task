@@ -9,8 +9,6 @@ function RouteScrollReset({ pathname }: { pathname: string }) {
   
   useEffect(() => {
     if (lenis) {
-      // Force Lenis to instantly reset scroll to the top and recalculate page bounds 
-      // when navigating via Next.js <Link> SPA transitions
       lenis.scrollTo(0, { immediate: true });
       lenis.resize();
     }
@@ -22,8 +20,6 @@ function RouteScrollReset({ pathname }: { pathname: string }) {
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
-  // Disable Lenis on Auth pages since they use a 100vh flex layout
-  // which conflicts with Lenis's resize observer and causes sluggish scrolling.
   if (pathname === "/login" || pathname === "/register") {
     return <>{children}</>;
   }

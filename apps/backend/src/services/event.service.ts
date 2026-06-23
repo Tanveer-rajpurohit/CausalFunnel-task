@@ -8,11 +8,10 @@ export const saveEvent = async (eventData: EventPayload) => {
 };
 
 export const getHeatmap = async (pageUrl: string, sessionId?: string) => {
-    // Escapes special characters, then matches any URL ending with this path
     const safePath = pageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const urlRegex = new RegExp(`${safePath}$`, 'i');
 
-    const query: any = { 
+    const query: Record<string, unknown> = { 
         pageUrl: urlRegex, 
         eventType: 'click' 
     };

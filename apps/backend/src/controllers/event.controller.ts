@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { eventValidationSchema } from "../types/schema/schema.type";
-import * as EventService from "../services/event.service"; // 1. Added import
+import * as EventService from "../services/event.service";
 
 export const CreateEvent = async (req: Request, res: Response) => {
     try {                                                                                                                

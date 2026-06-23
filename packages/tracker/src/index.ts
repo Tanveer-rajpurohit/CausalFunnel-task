@@ -5,6 +5,13 @@ interface TrackerConfig {
     backendUrl: string;
 }
 
+declare global {
+    interface Window {
+        initTracker: (config: TrackerConfig) => void;
+        trackPageView: (backendUrl: string) => void;
+    }
+}
+
 const initTracker  = (config: TrackerConfig) : void => {
     if (typeof window === 'undefined') return;
 
@@ -12,5 +19,5 @@ const initTracker  = (config: TrackerConfig) : void => {
     initClickTracking(config.backendUrl);
 }
 
-(window as any).initTracker = initTracker;
-(window as any).trackPageView = trackPageView;
+window.initTracker = initTracker;
+window.trackPageView = trackPageView;

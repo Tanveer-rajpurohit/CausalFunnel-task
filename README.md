@@ -4,8 +4,6 @@
 
 CausalFunnel helps e-commerce businesses understand user behavior through session tracking and analytics. This project is a working implementation of that idea: a lightweight JavaScript tracker captures page views and clicks on any webpage, sends the data to a backend API, and a dashboard visualizes everything in real time.
 
-The application was built as an assignment for the **Full Stack Engineer** role at CausalFunnel. The full assignment brief is available [here](./Full%20Stack%20Engineer%20-%20Assignment.md).
-
 ---
 
 ## What It Does
@@ -31,8 +29,9 @@ A Node.js + Express API (`apps/backend`) receives tracking events and stores the
 |--------|--------------------------------|--------------------------------------------------------------|
 | POST   | /api/v1/events                 | Receive and store an event from the tracker                  |
 | GET    | /api/v1/events/heatmap?url=    | Return click coordinates for a specific page (for heatmap)   |
-| GET    | /api/v1/sessions               | List all sessions with total event counts                    |
+| GET    | /api/v1/sessions               | List all sessions with event counts and pagination           |
 | GET    | /api/v1/sessions/:id/events    | Return all events for a session in chronological order       |
+| GET    | /api/v1/pages                  | Return distinct tracked page paths for dropdown filters      |
 
 Incoming events are validated using **Zod** before being saved to MongoDB. The Zod schema serves as the single source of truth for both TypeScript types and runtime validation, so they can never fall out of sync.
 
@@ -130,7 +129,9 @@ pnpm install
 pnpm --filter tracker build
 ```
 
-This bundles the tracker script and copies it to `apps/demo-web/public/tracker.js`.
+This bundles the tracker script into a single IIFE file at `packages/tracker/dist/tracker.js`. A `postbuild` script then automatically copies it to `apps/demo-web/public/tracker.js` so the demo page can load it via a `<script>` tag.
+
+If you ever modify the tracker source, just run this command again and the demo page picks up the changes.
 
 ### 3. Set up environment variables
 
@@ -169,13 +170,54 @@ Open `http://localhost:3001` to generate tracking events. View them at `http://l
 
 ---
 
-## Deployment
+## Deployment (AWS EC2 -- Self-Hosted)
 
-| Component  | Platform | Environment Variables                          |
-|------------|----------|------------------------------------------------|
-| Backend    | Railway  | `MONGODB_URI`, `PORT`                          |
-| Dashboard  | Vercel   | `NEXT_PUBLIC_BACKEND_URL` (Railway backend URL)|
-| Demo Web   | Vercel   | `NEXT_PUBLIC_BACKEND_URL` (Railway backend URL)|
+All three services run on a single **t2.micro** EC2 instance (AWS Free Tier).
+
+### Build for Production
+
+```bash
+# Build the tracker (output goes to demo-web/public/tracker.js via postbuild)
+pnpm --filter tracker build
+
+# Build the dashboard
+pnpm --filter dashboard build
+
+# Build the demo web
+pnpm --filter demo-web build
+```
+
+### Run in Production
+
+Install [PM2](https://pm2.keymetrics.io/) as a process manager:
+
+```bash
+npm install -g pm2
+```
+
+Start all services:
+
+```bash
+pm2 start "pnpm --filter backend run dev" --name backend
+pm2 start "pnpm --filter dashboard run start" --name dashboard
+pm2 start "pnpm --filter demo-web run start -- -p 3001" --name demo-web
+pm2 save
+```
+
+### Environment Variables
+
+| App        | Variable                 | Value                           |
+|------------|--------------------------|----------------------------------|
+| Backend    | `MONGODB_URI`            | MongoDB Atlas connection string |
+| Backend    | `PORT`                   | `8080`                          |
+| Dashboard  | `NEXT_PUBLIC_BACKEND_URL`| `http://YOUR_SERVER_IP:8080`    |
+| Demo Web   | `NEXT_PUBLIC_BACKEND_URL`| `http://YOUR_SERVER_IP:8080`    |
+
+| Service   | Port | URL                        |
+|-----------|------|----------------------------|
+| Backend   | 8080 | `http://YOUR_IP:8080`      |
+| Dashboard | 3000 | `http://YOUR_IP:3000`      |
+| Demo Web  | 3001 | `http://YOUR_IP:3001`      |
 
 ---
 

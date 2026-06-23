@@ -33,7 +33,7 @@ export const getSessionsList = async (
 };
 
 export const getSessionEvents = async (sessionId: string, eventType?: string) => {
-  const query: any = { sessionId };
+  const query: Record<string, unknown> = { sessionId };
   if (eventType && eventType !== "all") {
     query.eventType = eventType;
   }
