@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-
-interface Session {
-  id?: string;
-  _id?: string;
-  eventCount: number;
-  lastActive: string;
-}
+import { Session } from "../types/api.types";
 
 interface SessionListProps {
   sessions: Session[];

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { SessionAPI } from '../service/api.service';
 import { useAppStore } from '../store/useAppStore';
+import { PaginatedSessionsResponse } from '../types/api.types';
 
 export function useSessionList(limit: number, page: number, sortBy: string, order: string) {
-  const [data, setData] = useState<{ sessions: Record<string, unknown>[], meta: Record<string, unknown> } | null>(null);
+  const [data, setData] = useState<PaginatedSessionsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

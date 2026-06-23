@@ -16,7 +16,7 @@ export default function DashboardPage() {
 
   const [sortBy, order] = sortValue.split("-");
 
-  const { data, isLoading, error } = useSessionList(parseInt(limit), page, sortBy, order);
+  const { data, isLoading, error } = useSessionList(parseInt(limit), page, sortBy || "lastActive", order || "desc");
 
   const sortOptions = [
     { label: "Newest Active", value: "lastActive-desc" },

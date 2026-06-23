@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { SessionAPI, EventAPI } from '../service/api.service';
+import { EventData, HeatmapData } from '../types/api.types';
 
 export function useSessionEvents(sessionId: string, type: string) {
-  const [events, setEvents] = useState<Record<string, unknown>[]>([]);
+  const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +30,7 @@ export function useSessionEvents(sessionId: string, type: string) {
 }
 
 export function useHeatmap(pageUrl: string, sessionId?: string) {
-  const [heatmapData, setHeatmapData] = useState<Record<string, unknown>[]>([]);
+  const [heatmapData, setHeatmapData] = useState<HeatmapData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
