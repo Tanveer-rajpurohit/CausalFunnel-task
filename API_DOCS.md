@@ -1,205 +1,104 @@
-# API Documentation
+# CausalFunnel Analytics API Documentation
 
-Base URL: `http://localhost:8080/api/v1`
+Welcome to the CausalFunnel Analytics API. This document details the RESTful endpoints available to track user interactions and retrieve analytical data for our dashboard.
+
+**Base URL:** `http://localhost:8080/api/v1`
 
 ---
 
-## Events
+## 1. Events Tracking
 
 ### POST /events
-
-Receive and store a tracking event from the client-side script.
+Receives and stores a tracking event from the client-side script.
 
 **Request Body:**
-
 ```json
 {
   "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-  "eventType": "page_view",
-  "pageUrl": "https://demo.example.com/products",
-  "timestamp": 1750672800000
-}
-```
-
-For click events, include coordinates:
-
-```json
-{
-  "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-  "eventType": "click",
+  "eventType": "page_view", // or "click"
   "pageUrl": "https://demo.example.com/products",
   "timestamp": 1750672800000,
-  "coordX": 340,
-  "coordY": 512
+  "coordX": 340, // Required only if eventType is "click"
+  "coordY": 512  // Required only if eventType is "click"
 }
 ```
 
 **Success Response (201):**
-
 ```json
 {
   "success": true,
-  "data": {
-    "_id": "667890abc123def456789012",
-    "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-    "eventType": "page_view",
-    "pageUrl": "https://demo.example.com/products",
-    "timestamp": "2026-06-23T04:00:00.000Z",
-    "__v": 0
-  }
-}
-```
-
-**Error Response (400) -- Zod Validation Failure:**
-
-```json
-{
-  "success": false,
-  "message": {
-    "issues": [
-      {
-        "code": "invalid_type",
-        "expected": "string",
-        "received": "undefined",
-        "path": ["sessionId"],
-        "message": "Required"
-      }
-    ]
-  }
-}
-```
-
-**Validation Rules (Zod):**
-
-| Field       | Type                         | Required | Notes                                |
-|-------------|------------------------------|----------|--------------------------------------|
-| sessionId   | string                       | Yes      | Min length 1                         |
-| eventType   | "page_view" or "click"       | Yes      | Enum, must be one of the two values  |
-| pageUrl     | string (valid URL)           | Yes      | Must be a valid URL format           |
-| timestamp   | number or date string        | No       | Auto-coerced to Date. Defaults to now|
-| coordX      | number                       | No       | Only relevant for click events       |
-| coordY      | number                       | No       | Only relevant for click events       |
-
----
-
-### GET /events/heatmap?url={pageUrl}
-
-Fetch all click coordinates for a specific page. Used to render the heatmap overlay in the dashboard.
-
-**Query Parameters:**
-
-| Param | Type   | Required | Description                       |
-|-------|--------|----------|-----------------------------------|
-| url   | string | Yes      | The page URL to get click data for|
-
-**Example Request:**
-
-```
-GET /api/v1/events/heatmap?url=https://demo.example.com/products
-```
-
-**Success Response (200):**
-
-```json
-{
-  "success": true,
-  "data": [
-    { "coordX": 340, "coordY": 512, "timestamp": "2026-06-23T04:00:00.000Z" },
-    { "coordX": 120, "coordY": 300, "timestamp": "2026-06-23T04:01:15.000Z" },
-    { "coordX": 780, "coordY": 200, "timestamp": "2026-06-23T04:02:30.000Z" }
-  ]
-}
-```
-
-**Error Response (400) -- Missing URL:**
-
-```json
-{
-  "success": false,
-  "message": "URL parameter is required"
+  "data": { ...savedEventObject }
 }
 ```
 
 ---
 
-## Sessions
+## 2. Sessions Management
 
 ### GET /sessions
+Fetches an aggregated list of user sessions, including their total event counts and last active timestamps. Supports robust sorting and pagination.
 
-Fetch a list of all unique sessions with their total event counts. Results are sorted by most recently active session first.
+**Query Parameters:**
+| Param    | Type   | Required | Description                                       |
+|----------|--------|----------|---------------------------------------------------|
+| `sortBy` | string | No       | Field to sort by: `eventCount` or `lastActive`. Defaults to `lastActive`. |
+| `order`  | string | No       | Sort direction: `asc` or `desc`. Defaults to `desc`.     |
+| `limit`  | number | No       | Rows per page. Defaults to 10.                    |
+| `page`   | number | No       | Current page number. Defaults to 1.               |
 
 **Example Request:**
-
-```
-GET /api/v1/sessions
-```
+`GET /api/v1/sessions?sortBy=eventCount&order=desc&limit=25&page=1`
 
 **Success Response (200):**
-
 ```json
 {
   "success": true,
   "data": [
     {
       "_id": "550e8400-e29b-41d4-a716-446655440000",
-      "eventCount": 14,
-      "lastActive": "2026-06-23T04:05:00.000Z"
-    },
-    {
-      "_id": "660f9500-f39c-52e5-b827-557766551111",
-      "eventCount": 7,
-      "lastActive": "2026-06-23T03:50:00.000Z"
+      "eventCount": 42,
+      "lastActive": "2026-06-23T12:00:00.000Z"
     }
-  ]
+  ],
+  "meta": {
+    "totalRecords": 1560,
+    "totalPages": 63,
+    "currentPage": 1
+  }
 }
 ```
 
 ---
 
-### GET /sessions/:sessionId/events
+## 3. User Journey (Timeline)
 
-Fetch all events for a specific session, sorted chronologically (oldest first). This represents the user journey.
+### GET /sessions/:sessionId/events
+Fetches the chronological timeline of events for a specific session. Used to render the User Journey view.
 
 **Path Parameters:**
+| Param       | Type   | Required | Description           |
+|-------------|--------|----------|-----------------------|
+| `sessionId` | string | Yes      | The session UUID      |
 
-| Param     | Type   | Required | Description           |
-|-----------|--------|----------|-----------------------|
-| sessionId | string | Yes      | The session UUID      |
+**Query Parameters:**
+| Param  | Type   | Required | Description                                               |
+|--------|--------|----------|-----------------------------------------------------------|
+| `type` | string | No       | Filter by event type: `page_view` or `click`. If omitted, returns all events. |
 
 **Example Request:**
-
-```
-GET /api/v1/sessions/550e8400-e29b-41d4-a716-446655440000/events
-```
+`GET /api/v1/sessions/550e8400.../events?type=click`
 
 **Success Response (200):**
-
 ```json
 {
   "success": true,
   "data": [
     {
-      "_id": "667890abc123def456789012",
-      "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-      "eventType": "page_view",
-      "pageUrl": "https://demo.example.com/",
-      "timestamp": "2026-06-23T04:00:00.000Z"
-    },
-    {
-      "_id": "667890abc123def456789013",
-      "sessionId": "550e8400-e29b-41d4-a716-446655440000",
+      "timestamp": "2026-06-23T12:05:00.000Z",
       "eventType": "click",
-      "pageUrl": "https://demo.example.com/",
-      "timestamp": "2026-06-23T04:00:05.000Z",
-      "coordX": 340,
-      "coordY": 512
-    },
-    {
-      "_id": "667890abc123def456789014",
-      "sessionId": "550e8400-e29b-41d4-a716-446655440000",
-      "eventType": "page_view",
-      "pageUrl": "https://demo.example.com/products",
-      "timestamp": "2026-06-23T04:00:10.000Z"
+      "pageUrl": "/about",
+      "coordX": 1044,
+      "coordY": 42
     }
   ]
 }
@@ -207,72 +106,50 @@ GET /api/v1/sessions/550e8400-e29b-41d4-a716-446655440000/events
 
 ---
 
-## Testing with cURL
+## 4. Heatmap Visualizations
 
-### Create a page_view event
+### GET /heatmap
+A unified API endpoint for fetching aggregated click coordinate data. This powers both the local session heatmaps and the global aggregate heatmaps.
 
-```bash
-curl -X POST http://localhost:8080/api/v1/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sessionId": "test-session-001",
-    "eventType": "page_view",
-    "pageUrl": "https://demo.example.com/",
-    "timestamp": 1750672800000
-  }'
-```
+**Query Parameters:**
+| Param       | Type   | Required | Description                                       |
+|-------------|--------|----------|---------------------------------------------------|
+| `url`       | string | Yes      | The page path to retrieve click data for (e.g., `/products`). Automatically matches against full database URLs. |
+| `sessionId` | string | No       | If provided, returns clicks ONLY for this session (Local Heatmap). If omitted, aggregates clicks across ALL sessions (Global Heatmap). |
 
-### Create a click event
+**Example Request:**
+`GET /api/v1/heatmap?url=/products`
 
-```bash
-curl -X POST http://localhost:8080/api/v1/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sessionId": "test-session-001",
-    "eventType": "click",
-    "pageUrl": "https://demo.example.com/",
-    "timestamp": 1750672805000,
-    "coordX": 340,
-    "coordY": 512
-  }'
-```
-
-### Fetch all sessions
-
-```bash
-curl http://localhost:8080/api/v1/sessions
-```
-
-### Fetch events for a session
-
-```bash
-curl http://localhost:8080/api/v1/sessions/test-session-001/events
-```
-
-### Fetch heatmap data
-
-```bash
-curl "http://localhost:8080/api/v1/events/heatmap?url=https://demo.example.com/"
+**Success Response (200):**
+*Note: The backend intelligently groups identical coordinates to reduce payload size. The frontend handles visual grid mapping.*
+```json
+{
+  "success": true,
+  "data": [
+    { "x": 1044, "y": 42, "clicks": 5 },
+    { "x": 500, "y": 300, "clicks": 12 }
+  ]
+}
 ```
 
 ---
 
-## Testing with PowerShell (Windows)
+## 5. Dynamic Page Filters
 
-### Create a page_view event
+### GET /pages
+Fetches a distinct list of all unique URL paths (e.g. `/`, `/about`) that have been tracked in the database, automatically extracting them from full URLs. Used to populate frontend URL dropdowns dynamically.
 
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events" -Method POST -ContentType "application/json" -Body '{"sessionId":"test-session-001","eventType":"page_view","pageUrl":"https://demo.example.com/","timestamp":1750672800000}'
-```
+**Example Request:**
+`GET /api/v1/pages`
 
-### Fetch all sessions
-
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8080/api/v1/sessions" -Method GET
-```
-
-### Fetch heatmap data
-
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8080/api/v1/events/heatmap?url=https://demo.example.com/" -Method GET
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    "/",
+    "/about",
+    "/products"
+  ]
+}
 ```

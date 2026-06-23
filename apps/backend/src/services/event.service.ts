@@ -8,8 +8,11 @@ export const saveEvent = async (eventData: EventPayload) => {
 };
 
 export const getHeatmap = async (pageUrl: string) => {
+    const safePath = pageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const urlRegex = new RegExp(`${safePath}$`, 'i');
+
     const clicks = await EventModel.find({ 
-        pageUrl: pageUrl, 
+        pageUrl: urlRegex, 
         eventType: 'click' 
     }).select('coordX coordY timestamp -_id');
 
