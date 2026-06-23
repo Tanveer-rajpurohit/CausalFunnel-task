@@ -40,7 +40,15 @@ export function useDropdownPages() {
       setError(null);
       try {
         const response = await SessionAPI.getDistinctPages();
-        setAvailablePages(response.data || []);
+        const pagesData = response.data || [];
+        setAvailablePages(pagesData);
+        
+        // Auto-select first page
+        if (pagesData.length > 0) {
+          const store = useAppStore.getState();
+          if (store.globalFilterUrl === 'all') store.setGlobalFilterUrl(pagesData[0]);
+          if (store.sessionFilterUrl === 'all') store.setSessionFilterUrl(pagesData[0]);
+        }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Failed to load dynamic page filters');
       } finally {

@@ -14,10 +14,7 @@ export default function GlobalHeatmapPage() {
   const { pages } = useDropdownPages();
   const { heatmapData, isLoading, error } = useHeatmap(globalFilterUrl, 'global');
 
-  const urlOptions = [
-    { label: "Select a page...", value: "all" },
-    ...pages.map(p => ({ label: p, value: p }))
-  ];
+  const urlOptions = pages.map(p => ({ label: p, value: p }));
 
   return (
     <div className="w-full min-h-screen pt-20 pb-12 px-8 lg:px-16 mx-auto animate-in fade-in duration-500">
