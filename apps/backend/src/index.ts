@@ -13,6 +13,8 @@ app.use(cors({
     origin: [
         'http://localhost:3000',
         'http://localhost:3001', 
+        'https://causal-funnel-task-dashboard.vercel.app',
+        'https://causal-funnel-task-demo-web.vercel.app'
     ],
     credentials: true,
 }));
