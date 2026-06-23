@@ -7,13 +7,16 @@ const connectDb = async (retries = 3, delay = 3000): Promise<void> => {
     while (retries > 0) {
         try {
             await mongoose.connect(MONGODB_URI, {
-                serverSelectionTimeoutMS: 10000, 
+                serverSelectionTimeoutMS: 15000,
+                socketTimeoutMS: 45000, 
+                maxPoolSize: 10,         
             });
             console.log("Database successfully connected");
             return; 
-        } catch (err) {
+        } catch (err: any) {
             retries -= 1;
             console.error(`Unable to connect to the database. Retries left: ${retries}`);
+            console.error("ERROR:", err.message);
             
             if (retries === 0) {
                 console.error("All database connection retries failed. Exiting process.");

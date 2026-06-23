@@ -14,10 +14,10 @@ export default function Page() {
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center p-8 transition-colors duration-300">
       <h1 className="font-garamond-dark text-5xl md:text-6xl mb-6 tracking-tight text-center">
-        Welcome to CausalFunnel Demo
+        Welcome to the Tracking Demo
       </h1>
       <p className="font-inter-regular text-lg md:text-xl mb-12 max-w-2xl text-center text-light-muted dark:text-dark-muted">
-        This page is styled end-to-end with the premium Airix design tokens, including typography, colors, and transitions.
+        This is a sample webpage designed to test the CausalFunnel analytics script. Every page view and click you make here is being tracked and sent to the backend.
       </p>
       
       {mounted ? (

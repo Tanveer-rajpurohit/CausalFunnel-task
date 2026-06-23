@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "../components/ThemeProvider";
 import { SmoothScroll } from "../components/SmoothScroll";
 import { TrackerScript } from "../components/TrackerScript";
+import { Navbar } from "../components/Navbar"; // Added import
 
 const EB_Graramond_dark = EB_Garamond({
   variable: "--font-eb-garamond-dark",
@@ -48,9 +49,10 @@ export default function RootLayout({
       className={`${EB_Graramond_dark.variable} ${EB_Graramond_light.variable} ${inter_regular.variable} ${inter_bold.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col pt-24" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <SmoothScroll>
+            <Navbar />
             {children}
           </SmoothScroll>
         </ThemeProvider>

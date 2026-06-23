@@ -12,5 +12,5 @@ const initTracker  = (config: TrackerConfig) : void => {
     initClickTracking(config.backendUrl);
 }
 
-
 (window as any).initTracker = initTracker;
+(window as any).trackPageView = trackPageView;

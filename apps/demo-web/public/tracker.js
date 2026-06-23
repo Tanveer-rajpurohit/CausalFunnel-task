@@ -70,4 +70,5 @@
     click_default(config.backendUrl);
   };
   window.initTracker = initTracker;
+  window.trackPageView = pageView_default;
 })();

@@ -108,14 +108,35 @@ For this to work, place `tracker.js` in your `public/` folder so it is served as
 
 ### Method 3 -- Next.js (used in demo-web)
 
-Create a client component that wraps `next/script`. This is how `apps/demo-web` integrates the tracker.
+Create a client component that wraps `next/script` and uses `usePathname` to track client-side navigation.
 
 ```tsx
 // components/TrackerScript.tsx
 "use client";
 import Script from "next/script";
+import { usePathname } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 
 export function TrackerScript() {
+  const pathname = usePathname();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    // Skip the first execution because initTracker already fired the initial page_view
+    if (isFirstLoad.current) {
+      if (isLoaded) {
+        isFirstLoad.current = false;
+      }
+      return;
+    }
+
+    // Fire a page_view event every time the pathname changes AFTER the initial load
+    if (isLoaded && typeof window !== "undefined" && (window as any).trackPageView) {
+      (window as any).trackPageView(process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080");
+    }
+  }, [pathname, isLoaded]);
+
   return (
     <Script
       src="/tracker.js"
@@ -125,6 +146,7 @@ export function TrackerScript() {
           (window as any).initTracker({
             backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"
           });
+          setIsLoaded(true); // Mark as loaded so future route changes can trigger trackPageView
         }
       }}
     />
