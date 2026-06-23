@@ -5,9 +5,11 @@ import { MousePointerClick, Grid as GridIcon, Focus } from "lucide-react";
 
 interface HeatmapVisualizerProps {
   type: "global" | "local";
+  data?: Array<{ coordX: number; coordY: number }>;
+  isLoading?: boolean;
 }
 
-export function HeatmapVisualizer({ type }: HeatmapVisualizerProps) {
+export function HeatmapVisualizer({ type, data = [], isLoading = false }: HeatmapVisualizerProps) {
   const [mode, setMode] = useState<"points" | "grid">("points");
   const [hoveredCell, setHoveredCell] = useState<{ c: number; r: number; val: number } | null>(null);
 
@@ -15,25 +17,22 @@ export function HeatmapVisualizer({ type }: HeatmapVisualizerProps) {
   const rows = 12;
 
   const getIntensity = (c: number, r: number) => {
-    if (type === "local") {
-      // 3 clear hotspots for local session
-      if (c === 18 && r === 2) return 8;
-      if (c === 6 && r === 5) return 4;
-      if (c === 13 && r === 8) return 2;
-      return 0;
-    } else {
-      if (c === 18 && r === 2) return 45;
-      if (c === 6 && r === 5) return 22;
-      if (c === 13 && r === 8) return 12;
-      if (c === 10 && r === 4) return 8;
-      
-      if (c === 17 && r === 2) return 15;
-      if (c === 19 && r === 2) return 12;
-      if (c === 18 && r === 1) return 10;
-      if (c === 18 && r === 3) return 18;
-      
-      return 0;
+    if (!data || data.length === 0) return 0;
+    
+    const minX = c * 60;
+    const maxX = (c + 1) * 60;
+    const minY = r * 75;
+    const maxY = (r + 1) * 75;
+
+    let count = 0;
+    for (const point of data) {
+      if (point.coordX != null && point.coordY != null) {
+        if (point.coordX >= minX && point.coordX < maxX && point.coordY >= minY && point.coordY < maxY) {
+          count++;
+        }
+      }
     }
+    return count;
   };
 
   const getCellColor = (intensity: number) => {
@@ -78,25 +77,29 @@ export function HeatmapVisualizer({ type }: HeatmapVisualizerProps) {
       <div className="w-full aspect-video bg-light-surface dark:bg-dark-surface relative overflow-hidden flex flex-col border border-light-border dark:border-dark-border shadow-inner rounded-xl transition-all duration-500 hover:shadow-md group">
         <div className="absolute inset-0 opacity-[0.15] bg-[linear-gradient(to_right,#6c6a64_1px,transparent_1px),linear-gradient(to_bottom,#6c6a64_1px,transparent_1px)] [background-size:4.16%_8.33%] pointer-events-none"></div>
 
+        {isLoading && (
+           <div className="absolute inset-0 z-30 flex items-center justify-center bg-light-bg/50 dark:bg-dark-bg/50 backdrop-blur-sm">
+             <span className="font-inter-bold text-[#cc785c] animate-pulse">Loading Map...</span>
+           </div>
+        )}
+
         {mode === "points" && (
           <div className="absolute inset-0 z-10 pointer-events-none">
-            {type === "local" ? (
-              <>
-                <div className="absolute w-3 h-3 rounded-full bg-[#cc785c] top-[15%] left-[75%] blur-[1px] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_10px_rgba(204,120,92,0.8)]"></div>
-                <div className="absolute w-3 h-3 rounded-full bg-[#cc785c] top-[45%] left-[25%] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_10px_rgba(204,120,92,0.8)]" style={{ animationDelay: "1s" }}></div>
-                <div className="absolute w-5 h-5 rounded-full bg-orange-500 top-[65%] left-[55%] blur-[2px] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_15px_rgba(255,165,0,0.8)]" style={{ animationDelay: "0.5s" }}></div>
-              </>
-            ) : (
-              <>
-                <div className="absolute w-8 h-8 rounded-full bg-red-500 top-[12%] left-[73%] blur-[4px] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_20px_rgba(255,0,0,0.8)]"></div>
-                <div className="absolute w-5 h-5 rounded-full bg-orange-500 top-[15%] left-[75%] blur-[2px] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_15px_rgba(255,165,0,0.8)]" style={{ animationDelay: "0.3s" }}></div>
-                
-                <div className="absolute w-5 h-5 rounded-full bg-orange-500 top-[43%] left-[24%] blur-[2px] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_15px_rgba(255,165,0,0.8)]" style={{ animationDelay: "0.8s" }}></div>
-                <div className="absolute w-3 h-3 rounded-full bg-[#cc785c] top-[45%] left-[25%] blur-[1px] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_10px_rgba(204,120,92,0.8)]" style={{ animationDelay: "1.2s" }}></div>
-                
-                <div className="absolute w-3 h-3 rounded-full bg-[#cc785c] top-[63%] left-[53%] blur-[1px] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_10px_rgba(204,120,92,0.8)]" style={{ animationDelay: "0.5s" }}></div>
-              </>
-            )}
+            {data.map((point, i) => {
+              if (point.coordX == null || point.coordY == null) return null;
+              
+              // Map to % based on assumed 1440x900
+              const left = Math.min(100, Math.max(0, (point.coordX / 1440) * 100));
+              const top = Math.min(100, Math.max(0, (point.coordY / 900) * 100));
+              
+              return (
+                <div 
+                  key={i} 
+                  className="absolute w-4 h-4 rounded-full bg-[#cc785c] blur-[2px] animate-pulse mix-blend-multiply dark:mix-blend-screen shadow-[0_0_10px_rgba(204,120,92,0.8)]"
+                  style={{ top: `${top}%`, left: `${left}%`, animationDelay: `${(i % 10) * 0.1}s` }}
+                />
+              );
+            })}
           </div>
         )}
 

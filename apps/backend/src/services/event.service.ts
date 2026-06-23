@@ -7,14 +7,21 @@ export const saveEvent = async (eventData: EventPayload) => {
     return event;
 };
 
-export const getHeatmap = async (pageUrl: string) => {
+export const getHeatmap = async (pageUrl: string, sessionId?: string) => {
+    // Escapes special characters, then matches any URL ending with this path
     const safePath = pageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const urlRegex = new RegExp(`${safePath}$`, 'i');
 
-    const clicks = await EventModel.find({ 
+    const query: any = { 
         pageUrl: urlRegex, 
         eventType: 'click' 
-    }).select('coordX coordY timestamp -_id');
+    };
+
+    if (sessionId) {
+        query.sessionId = sessionId;
+    }
+
+    const clicks = await EventModel.find(query).select('coordX coordY timestamp -_id');
 
     return clicks;
 };

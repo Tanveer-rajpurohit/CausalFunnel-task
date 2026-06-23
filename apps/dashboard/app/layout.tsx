@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { EB_Garamond, Inter } from "next/font/google";
 import "@repo/ui/styles.css";
 import "./globals.css";
-import { ThemeProvider } from "../components/ThemeProvider";
-import { SmoothScroll } from "../components/SmoothScroll";
+import { ThemeProvider } from "../src/components/ThemeProvider";
+import { SmoothScroll } from "../src/components/SmoothScroll";
 
 const EB_Graramond_dark = EB_Garamond({
   variable: "--font-eb-garamond-dark",

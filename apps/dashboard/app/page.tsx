@@ -3,33 +3,35 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, ChevronDown, MousePointerClick, ArrowLeft } from "lucide-react";
+import { ArrowRight, MousePointerClick, ArrowLeft } from "lucide-react";
 
-import { Dropdown } from "../components/Dropdown";
-import { SessionList } from "../components/SessionList";
+import { Dropdown } from "../src/components/Dropdown";
+import { SessionList } from "../src/components/SessionList";
+import { useSessionList } from "../src/hooks/useSessions";
 
 export default function DashboardPage() {
-  const [sortEvents, setSortEvents] = useState("desc");
-  const [sortActive, setSortActive] = useState("desc");
+  const [sortValue, setSortValue] = useState("lastActive-desc");
+  const [limit, setLimit] = useState("10");
+  const [page, setPage] = useState(1);
+
+  const [sortBy, order] = sortValue.split("-");
+
+  const { data, isLoading, error } = useSessionList(parseInt(limit), page, sortBy, order);
 
   const sortOptions = [
-    { label: "Highest First", value: "desc" },
-    { label: "Lowest First", value: "asc" }
+    { label: "Newest Active", value: "lastActive-desc" },
+    { label: "Oldest Active", value: "lastActive-asc" },
+    { label: "Most Events", value: "eventCount-desc" },
+    { label: "Least Events", value: "eventCount-asc" }
   ];
 
-  const timeOptions = [
-    { label: "Newest First", value: "desc" },
-    { label: "Oldest First", value: "asc" }
-  ];
+  const handleNextPage = () => {
+    if (data && page < data.meta.totalPages) setPage(p => p + 1);
+  };
 
-  const mockSessions = [
-    { id: "c8ed1018-0f9b-467b-a409-eb218eb04b54", eventCount: 42, lastActive: "2 mins ago" },
-    { id: "453d4061-3339-4286-b4ca-5808e8e7340d", eventCount: 15, lastActive: "1 hour ago" },
-    { id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", eventCount: 128, lastActive: "3 hours ago" },
-    { id: "f1e2d3c4-b5a6-0987-dcba-0987654321fe", eventCount: 4, lastActive: "5 hours ago" },
-    { id: "11223344-5566-7788-99aa-bbccddeeff00", eventCount: 67, lastActive: "1 day ago" },
-    { id: "ffeebbdd-ccaa-9988-7766-554433221100", eventCount: 22, lastActive: "2 days ago" },
-  ];
+  const handlePrevPage = () => {
+    if (page > 1) setPage(p => p - 1);
+  };
 
   return (
     <div className="w-full min-h-screen pt-20 pb-12 px-8 lg:px-16 mx-auto">
@@ -59,18 +61,23 @@ export default function DashboardPage() {
         
         <div className="flex gap-6 z-10">
           <div className="flex items-center gap-2">
-            <span className="font-inter-regular text-xs text-light-muted dark:text-dark-muted">Sort Events:</span>
-            <Dropdown options={sortOptions} value={sortEvents} onChange={setSortEvents} />
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <span className="font-inter-regular text-xs text-light-muted dark:text-dark-muted">Sort Active:</span>
-            <Dropdown options={timeOptions} value={sortActive} onChange={setSortActive} />
+            <span className="font-inter-regular text-xs text-light-muted dark:text-dark-muted">Sort By:</span>
+            <Dropdown options={sortOptions} value={sortValue} onChange={setSortValue} />
           </div>
         </div>
       </div>
 
-      <SessionList sessions={mockSessions} />
+      {isLoading ? (
+        <div className="py-20 text-center font-inter-bold text-light-muted dark:text-dark-muted animate-pulse">
+          Loading Sessions...
+        </div>
+      ) : error ? (
+        <div className="py-20 text-center font-inter-bold text-red-500">
+          {error}
+        </div>
+      ) : (
+        <SessionList sessions={data?.sessions || []} />
+      )}
 
       <div className="flex justify-between items-center mt-12 pb-12">
         <div className="flex items-center gap-2">
@@ -82,23 +89,35 @@ export default function DashboardPage() {
               { label: "50", value: "50" },
               { label: "100", value: "100" }
             ]} 
-            value="10" 
-            onChange={() => {}} 
+            value={limit} 
+            onChange={(val) => { setLimit(val); setPage(1); }} 
             openUpwards
           />
         </div>
         
-        <div className="flex items-center gap-6">
-          <span className="font-inter-regular text-sm text-light-muted dark:text-dark-muted">1-6 of 6</span>
-          <div className="flex gap-2">
-            <button className="group w-10 h-10 shrink-0 aspect-square rounded-full border border-light-border dark:border-dark-border flex items-center justify-center text-light-muted dark:text-dark-muted transition-all duration-300 hover:border-light-text hover:text-light-text dark:hover:border-dark-text dark:hover:text-dark-text disabled:opacity-30 disabled:hover:border-light-border cursor-not-allowed" disabled>
-              <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
-            </button>
-            <button className="group w-10 h-10 shrink-0 aspect-square rounded-full border border-light-border dark:border-dark-border flex items-center justify-center text-light-muted dark:text-dark-muted transition-all duration-300 hover:border-light-text hover:text-light-text dark:hover:border-dark-text dark:hover:text-dark-text disabled:opacity-30 disabled:hover:border-light-border cursor-not-allowed" disabled>
-              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </button>
+        {data && data.meta && (
+          <div className="flex items-center gap-6">
+            <span className="font-inter-regular text-sm text-light-muted dark:text-dark-muted">
+              Page {data.meta.currentPage} of {data.meta.totalPages} ({data.meta.totalRecords} total)
+            </span>
+            <div className="flex gap-2">
+              <button 
+                onClick={handlePrevPage}
+                disabled={page <= 1}
+                className="group w-10 h-10 shrink-0 aspect-square rounded-full border border-light-border dark:border-dark-border flex items-center justify-center text-light-muted dark:text-dark-muted transition-all duration-300 hover:border-light-text hover:text-light-text dark:hover:border-dark-text dark:hover:text-dark-text disabled:opacity-30 disabled:hover:border-light-border cursor-not-allowed"
+              >
+                <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
+              </button>
+              <button 
+                onClick={handleNextPage}
+                disabled={page >= data.meta.totalPages}
+                className="group w-10 h-10 shrink-0 aspect-square rounded-full border border-light-border dark:border-dark-border flex items-center justify-center text-light-muted dark:text-dark-muted transition-all duration-300 hover:border-light-text hover:text-light-text dark:hover:border-dark-text dark:hover:text-dark-text disabled:opacity-30 disabled:hover:border-light-border cursor-not-allowed"
+              >
+                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
     </div>

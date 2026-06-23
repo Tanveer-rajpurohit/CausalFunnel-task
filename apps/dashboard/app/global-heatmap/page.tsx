@@ -1,19 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowLeft, Globe, MousePointerClick } from "lucide-react";
-import { Dropdown } from "../../components/Dropdown";
-import { HeatmapVisualizer } from "../../components/HeatmapVisualizer";
+import { ArrowLeft, Globe } from "lucide-react";
+import { Dropdown } from "../../src/components/Dropdown";
+import { HeatmapVisualizer } from "../../src/components/HeatmapVisualizer";
+
+import { useAppStore } from "../../src/store/useAppStore";
+import { useDropdownPages } from "../../src/hooks/useSessions";
+import { useHeatmap } from "../../src/hooks/useEvents";
 
 export default function GlobalHeatmapPage() {
-  const [filterUrl, setFilterUrl] = useState("all");
+  const { globalFilterUrl, setGlobalFilterUrl } = useAppStore();
+  const { pages } = useDropdownPages();
+  const { heatmapData, isLoading, error } = useHeatmap(globalFilterUrl, 'global');
 
   const urlOptions = [
-    { label: "All Pages", value: "all" },
-    { label: "/", value: "/" },
-    { label: "/about", value: "/about" },
-    { label: "/products", value: "/products" },
+    { label: "Select a page...", value: "all" },
+    ...pages.map(p => ({ label: p, value: p }))
   ];
 
   return (
@@ -44,11 +47,19 @@ export default function GlobalHeatmapPage() {
         
         <div className="flex items-center gap-2 z-10">
           <span className="font-inter-regular text-xs text-light-muted dark:text-dark-muted">Page Filter:</span>
-          <Dropdown options={urlOptions} value={filterUrl} onChange={setFilterUrl} />
+          <Dropdown options={urlOptions} value={globalFilterUrl} onChange={setGlobalFilterUrl} />
         </div>
       </div>
 
-      <HeatmapVisualizer type="global" />
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+      
+      {globalFilterUrl === 'all' ? (
+        <div className="w-full aspect-video flex items-center justify-center border border-dashed border-light-border dark:border-dark-border rounded-xl">
+          <p className="text-light-muted dark:text-dark-muted font-inter-regular">Please select a page from the dropdown to view the heatmap.</p>
+        </div>
+      ) : (
+        <HeatmapVisualizer type="global" data={heatmapData} isLoading={isLoading} />
+      )}
 
     </div>
   );

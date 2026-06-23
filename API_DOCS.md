@@ -108,7 +108,7 @@ Fetches the chronological timeline of events for a specific session. Used to ren
 
 ## 4. Heatmap Visualizations
 
-### GET /heatmap
+### GET /events/heatmap
 A unified API endpoint for fetching aggregated click coordinate data. This powers both the local session heatmaps and the global aggregate heatmaps.
 
 **Query Parameters:**
