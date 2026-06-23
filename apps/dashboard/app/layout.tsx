@@ -33,7 +33,7 @@ const inter_bold = Inter({
 
 export const metadata: Metadata = {
   title: "CausalFunnel — Dashboard",
-  description: "Dashboard application",
+  description: "Analytics Dashboard",
 };
 
 export default function RootLayout({
@@ -47,10 +47,12 @@ export default function RootLayout({
       className={`${EB_Graramond_dark.variable} ${EB_Graramond_light.variable} ${inter_regular.variable} ${inter_bold.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className="min-h-full flex bg-light-bg dark:bg-dark-bg" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <SmoothScroll>
-            {children}
+            <main className="flex-1 min-h-screen w-full">
+              {children}
+            </main>
           </SmoothScroll>
         </ThemeProvider>
       </body>
