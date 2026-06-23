@@ -11,9 +11,17 @@ export const GetSessions = async (req: Request, res: Response) => {
         const sortByField = req.query.sortBy === "lastActive" ? "lastActive" : "eventCount";
         const sortOrder = req.query.order === "asc" ? 1 : -1;
         
-        const sessions = await SessionService.getSessionsList(sortByField, sortOrder as 1 | -1, limit, skip);
+        const result = await SessionService.getSessionsList(sortByField, sortOrder as 1 | -1, limit, skip);
 
-        res.status(200).json({ success: true, data: sessions });
+        res.status(200).json({ 
+            success: true, 
+            data: result.sessions,
+            meta: {
+                currentPage: page,
+                totalPages: Math.ceil(result.totalRecords / limit),
+                totalRecords: result.totalRecords
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal server error" });
     }

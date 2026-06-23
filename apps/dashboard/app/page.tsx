@@ -104,16 +104,24 @@ export default function DashboardPage() {
               <button 
                 onClick={handlePrevPage}
                 disabled={page <= 1}
-                className="group w-10 h-10 shrink-0 aspect-square rounded-full border border-light-border dark:border-dark-border flex items-center justify-center text-light-muted dark:text-dark-muted transition-all duration-300 hover:border-light-text hover:text-light-text dark:hover:border-dark-text dark:hover:text-dark-text disabled:opacity-30 disabled:hover:border-light-border cursor-not-allowed"
+                className={`group w-10 h-10 shrink-0 aspect-square rounded-full border flex items-center justify-center transition-all duration-300 ${
+                  page <= 1 
+                    ? "border-light-border dark:border-dark-border text-light-muted/50 dark:text-dark-muted/50 cursor-not-allowed" 
+                    : "border-light-border dark:border-dark-border text-light-muted dark:text-dark-muted hover:border-light-text hover:text-light-text dark:hover:border-dark-text dark:hover:text-dark-text cursor-pointer"
+                }`}
               >
-                <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
+                <ArrowLeft className={`w-4 h-4 transition-transform duration-300 ${page <= 1 ? "" : "group-hover:-translate-x-1"}`} />
               </button>
               <button 
                 onClick={handleNextPage}
                 disabled={page >= data.meta.totalPages}
-                className="group w-10 h-10 shrink-0 aspect-square rounded-full border border-light-border dark:border-dark-border flex items-center justify-center text-light-muted dark:text-dark-muted transition-all duration-300 hover:border-light-text hover:text-light-text dark:hover:border-dark-text dark:hover:text-dark-text disabled:opacity-30 disabled:hover:border-light-border cursor-not-allowed"
+                className={`group w-10 h-10 shrink-0 aspect-square rounded-full border flex items-center justify-center transition-all duration-300 ${
+                  page >= data.meta.totalPages 
+                    ? "border-light-border dark:border-dark-border text-light-muted/50 dark:text-dark-muted/50 cursor-not-allowed" 
+                    : "border-light-border dark:border-dark-border text-light-muted dark:text-dark-muted hover:border-light-text hover:text-light-text dark:hover:border-dark-text dark:hover:text-dark-text cursor-pointer"
+                }`}
               >
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${page >= data.meta.totalPages ? "" : "group-hover:translate-x-1"}`} />
               </button>
             </div>
           </div>

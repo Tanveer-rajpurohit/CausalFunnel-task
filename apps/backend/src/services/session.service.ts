@@ -6,7 +6,7 @@ export const getSessionsList = async (
   limit: number,
   skip: number,
 ) => {
-  const sessions = await EventModel.aggregate([
+  const result = await EventModel.aggregate([
     {
       $group: {
         _id: "$sessionId",
@@ -15,13 +15,21 @@ export const getSessionsList = async (
       },
     },
     {
-      $sort: { [sortByField]: sortOrder },
+      $facet: {
+        metadata: [{ $count: "total" }],
+        sessions: [
+          { $sort: { [sortByField]: sortOrder } },
+          { $skip: skip },
+          { $limit: limit },
+        ],
+      },
     },
-    { $skip: skip },
-    { $limit: limit },
   ]);
 
-  return sessions;
+  const sessions = result[0].sessions;
+  const totalRecords = result[0].metadata[0]?.total || 0;
+
+  return { sessions, totalRecords };
 };
 
 export const getSessionEvents = async (sessionId: string, eventType?: string) => {
