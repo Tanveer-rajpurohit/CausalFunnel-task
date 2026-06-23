@@ -3,7 +3,7 @@ import eventRoutes from "./event.route";
 import sessionRoutes from "./session.route";
 import { GetDistinctPages } from "../controllers/session.controller";
 
-const rootRouter = Router();
+const rootRouter: Router = Router();
 
 rootRouter.use('/events', eventRoutes);
 rootRouter.use('/sessions', sessionRoutes);
